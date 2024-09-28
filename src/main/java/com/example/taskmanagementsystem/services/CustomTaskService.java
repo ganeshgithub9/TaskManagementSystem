@@ -31,6 +31,7 @@ public class CustomTaskService implements TaskService{
     @Override
     public Task deleteTask(int id) {
         Optional<Task> task=taskRepository.findById(id);
+        taskRepository.deleteById(id);
         return task.orElse(null);
     }
 }
