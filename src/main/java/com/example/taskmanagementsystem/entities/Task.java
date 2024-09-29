@@ -16,4 +16,12 @@ public class Task {
     Integer taskId;
     String title,description,status,priority;
     Date dueDate;
+
+    @ManyToOne(fetch = FetchType.LAZY,cascade = {CascadeType.PERSIST, CascadeType.DETACH})
+    @JoinColumn
+    User createdBy;
+
+    @ManyToOne(fetch = FetchType.LAZY,cascade = {CascadeType.PERSIST, CascadeType.DETACH})
+    @JoinColumn
+    User assignedTo;
 }
