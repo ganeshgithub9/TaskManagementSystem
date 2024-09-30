@@ -21,15 +21,4 @@ public class CustomBeansCreator {
         modelMapper.createTypeMap(UserRequestDTO.class,User.class);
         return modelMapper;
     }
-
-    @Bean
-    @Primary
-    public BCryptPasswordEncoder bCryptPasswordEncoder() {
-        return new BCryptPasswordEncoder(BCryptPasswordEncoder.BCryptVersion.$2B,4);
-    }
-
-    @Bean
-    public SCryptPasswordEncoder sCryptPasswordEncoder() {
-        return SCryptPasswordEncoder.defaultsForSpringSecurity_v5_8();
-    }
 }
