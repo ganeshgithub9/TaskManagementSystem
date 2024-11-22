@@ -4,6 +4,7 @@ import com.example.taskmanagementsystem.dtos.UserAuthenticationRequestDTO;
 import com.example.taskmanagementsystem.dtos.UserRequestDTO;
 import com.example.taskmanagementsystem.dtos.UserResponseDTO;
 import com.example.taskmanagementsystem.entities.User;
+import com.example.taskmanagementsystem.exceptions.RoleNotFoundException;
 import com.example.taskmanagementsystem.services.UserService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,10 +21,9 @@ public class UserController {
     UserController(@Autowired UserService userService, @Autowired ModelMapper modelMapper) {
         this.userService = userService;
         this.modelMapper = modelMapper;
-
     }
     @PostMapping("/register")
-    public ResponseEntity<UserResponseDTO> registerUser(@RequestBody UserRequestDTO userRequestDTO) {
+    public ResponseEntity<UserResponseDTO> registerUser(@RequestBody UserRequestDTO userRequestDTO) throws RoleNotFoundException {
         User user=userService.registerUser(userRequestDTO);
         UserResponseDTO userResponseDTO=modelMapper.map(user, UserResponseDTO.class);
         return new ResponseEntity<>(userResponseDTO, HttpStatus.CREATED);

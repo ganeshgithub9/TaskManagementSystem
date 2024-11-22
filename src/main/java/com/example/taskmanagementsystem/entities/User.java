@@ -19,6 +19,10 @@ public class User {
     private String mail;
     private String name,password;
 
+    @JoinTable(joinColumns = {@JoinColumn(referencedColumnName = "id")},inverseJoinColumns = {@JoinColumn(referencedColumnName = "id")})
+    @ManyToMany(fetch = FetchType.LAZY)
+    List<Role> roles = new ArrayList<>();
+
     @OneToMany(mappedBy = "createdBy")
     List<Task> tasksCreated=new ArrayList<>();
 
