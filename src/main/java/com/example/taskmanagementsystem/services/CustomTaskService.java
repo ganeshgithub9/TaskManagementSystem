@@ -1,19 +1,23 @@
 package com.example.taskmanagementsystem.services;
 
 import com.example.taskmanagementsystem.dtos.AssignedUser;
+import com.example.taskmanagementsystem.dtos.TaskRequestDTO;
 import com.example.taskmanagementsystem.entities.Task;
 import com.example.taskmanagementsystem.entities.User;
 import com.example.taskmanagementsystem.exceptions.TaskNotFoundException;
 import com.example.taskmanagementsystem.exceptions.UserNotFoundException;
 import com.example.taskmanagementsystem.repositories.TaskRepository;
 import com.example.taskmanagementsystem.repositories.UserRepository;
+import com.example.taskmanagementsystem.specifications.TaskSpecification;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
 import org.springframework.data.crossstore.ChangeSetPersister;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -28,8 +32,14 @@ public class CustomTaskService implements TaskService{
         this.userRepository = userRepository;
     }
     @Override
-    public Task createTask(Task task) {
-        return taskRepository.save(task);
+    public Task createTask(TaskRequestDTO task) {
+        Task newTask = new Task();
+        newTask.setTitle(task.getTitle());
+        newTask.setDescription(task.getDescription());
+        newTask.setPriority(task.getPriority().toUpperCase());
+        newTask.setDueDate(task.getDueDate());
+        newTask.setStatus(task.getStatus().toUpperCase());
+        return taskRepository.save(newTask);
     }
 
     @Override
@@ -47,11 +57,10 @@ public class CustomTaskService implements TaskService{
     @Override
     public Task updateTask(Task taskBody, int id) throws TaskNotFoundException {
         Task task=taskRepository.findById(id).orElseThrow(()->new TaskNotFoundException("Task not found"));
-        task.setTaskId(taskBody.getTaskId());
         task.setDescription(taskBody.getDescription());
-        task.setPriority(taskBody.getPriority());
+        task.setPriority(taskBody.getPriority().toUpperCase());
         task.setDueDate(taskBody.getDueDate());
-        task.setStatus(taskBody.getStatus());
+        task.setStatus(taskBody.getStatus().toUpperCase());
         task.setTitle(taskBody.getTitle());
         return taskRepository.save(task);
     }
@@ -63,5 +72,11 @@ public class CustomTaskService implements TaskService{
         task.setAssignedTo(user1);
         taskRepository.save(task);
         return task;
+    }
+
+    @Override
+    public List<Task> filterTasks(String status, String priority, LocalDate dueDate) {
+        Specification<Task> specification=TaskSpecification.createSpecification(status, priority, dueDate);
+        return taskRepository.findAll(specification);
     }
 }

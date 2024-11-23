@@ -1,10 +1,12 @@
 package com.example.taskmanagementsystem.entities;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.Date;
+import java.time.LocalDate;
+
 
 @Setter
 @Getter
@@ -15,13 +17,14 @@ public class Task {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Integer taskId;
     String title,description,status,priority;
-    Date dueDate;
 
-    @ManyToOne(fetch = FetchType.LAZY,cascade = {CascadeType.PERSIST, CascadeType.DETACH})
+    LocalDate dueDate;
+
+    @ManyToOne(fetch = FetchType.LAZY,cascade = {CascadeType.PERSIST})
     @JoinColumn
     User createdBy;
 
-    @ManyToOne(fetch = FetchType.LAZY,cascade = {CascadeType.PERSIST, CascadeType.DETACH})
+    @ManyToOne(fetch = FetchType.LAZY,cascade = {CascadeType.PERSIST})
     @JoinColumn
     User assignedTo;
 }

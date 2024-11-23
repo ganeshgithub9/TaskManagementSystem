@@ -1,36 +1,48 @@
 package com.example.taskmanagementsystem.controllers;
 
 import com.example.taskmanagementsystem.dtos.AssignedUser;
+import com.example.taskmanagementsystem.dtos.TaskRequestDTO;
+import com.example.taskmanagementsystem.dtos.TaskResponseDTO;
 import com.example.taskmanagementsystem.entities.Task;
 import com.example.taskmanagementsystem.exceptions.TaskNotFoundException;
 import com.example.taskmanagementsystem.exceptions.UserNotFoundException;
 import com.example.taskmanagementsystem.services.TaskService;
+import jakarta.validation.Valid;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api")
 public class TaskController {
 
     TaskService taskService;
-    TaskController(@Autowired TaskService taskService){
+    private final ModelMapper modelMapper;
+
+    TaskController(@Autowired TaskService taskService,
+                   ModelMapper modelMapper){
         this.taskService = taskService;
+        this.modelMapper = modelMapper;
     }
     @PostMapping("/tasks")
-    public ResponseEntity<Task> createTask(@RequestBody Task taskBody){
+    public ResponseEntity<Task> createTask(@Valid @RequestBody TaskRequestDTO taskBody){
+        System.out.println(taskBody.getDueDate());
         Task task=taskService.createTask(taskBody);
         return new ResponseEntity<>(task, HttpStatus.CREATED);
     }
 
     @GetMapping("/tasks")
-    public ResponseEntity<List<Task>> getTasks(){
+    public ResponseEntity<List<TaskResponseDTO>> getTasks(){
         List<Task> tasks=taskService.getTasks();
-        return new ResponseEntity<>(tasks, HttpStatus.OK);
+        List<TaskResponseDTO> list= tasks.stream().map((element) -> modelMapper.map(element, TaskResponseDTO.class)).toList();
+        return new ResponseEntity<>(list, HttpStatus.OK);
     }
 
     @DeleteMapping("/tasks/{id}")
@@ -52,6 +64,13 @@ public class TaskController {
     public ResponseEntity<String> assignUserToTask(@PathVariable int id, @RequestBody AssignedUser user) throws TaskNotFoundException, UserNotFoundException {
         Task task=taskService.assignUserToTask(user.getId(),id);
         return new ResponseEntity<>("Task "+task.getTaskId()+" assigned to user "+task.getAssignedTo().getName(), HttpStatus.OK);
+    }
+
+    @GetMapping("/tasks/filter")
+    public ResponseEntity<List<TaskResponseDTO>> filterTasks(@RequestParam(value = "status",required = false) String status,@RequestParam(value = "priority",required = false) String priority,@RequestParam(value = "dueDate",required = false) LocalDate dueDate){
+        List<Task> tasks=taskService.filterTasks(status!=null?status.toUpperCase():null,priority!=null?priority.toUpperCase():null,dueDate);
+        List<TaskResponseDTO> list= tasks.stream().map((element) -> modelMapper.map(element, TaskResponseDTO.class)).toList();
+        return new ResponseEntity<>(list, HttpStatus.OK);
     }
 
 }
