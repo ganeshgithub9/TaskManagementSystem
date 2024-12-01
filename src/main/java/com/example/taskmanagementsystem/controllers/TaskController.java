@@ -6,10 +6,13 @@ import com.example.taskmanagementsystem.dtos.TaskResponseDTO;
 import com.example.taskmanagementsystem.entities.Task;
 import com.example.taskmanagementsystem.exceptions.TaskNotFoundException;
 import com.example.taskmanagementsystem.exceptions.UserNotFoundException;
+import com.example.taskmanagementsystem.projections.TaskProjection;
 import com.example.taskmanagementsystem.services.TaskService;
 import jakarta.validation.Valid;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -32,12 +35,14 @@ public class TaskController {
         this.modelMapper = modelMapper;
     }
     @PostMapping("/tasks")
-    public ResponseEntity<Task> createTask(@Valid @RequestBody TaskRequestDTO taskBody){
+    public ResponseEntity<TaskResponseDTO> createTask(@Valid @RequestBody TaskRequestDTO taskBody){
         System.out.println(taskBody.getDueDate());
         Task task=taskService.createTask(taskBody);
-        return new ResponseEntity<>(task, HttpStatus.CREATED);
+        TaskResponseDTO responseDTO=modelMapper.map(task, TaskResponseDTO.class);
+        return new ResponseEntity<>(responseDTO, HttpStatus.CREATED);
     }
 
+    //find all tasks without pagination
     @GetMapping("/tasks")
     public ResponseEntity<List<TaskResponseDTO>> getTasks(){
         List<Task> tasks=taskService.getTasks();
@@ -71,6 +76,11 @@ public class TaskController {
         List<Task> tasks=taskService.filterTasks(status!=null?status.toUpperCase():null,priority!=null?priority.toUpperCase():null,dueDate);
         List<TaskResponseDTO> list= tasks.stream().map((element) -> modelMapper.map(element, TaskResponseDTO.class)).toList();
         return new ResponseEntity<>(list, HttpStatus.OK);
+    }
+
+    @GetMapping("/tasks/paging")
+    public ResponseEntity<Page<TaskProjection>> getAllTasks(Pageable pageable){
+        return new ResponseEntity<>(taskService.getTasks(pageable),HttpStatus.OK);
     }
 
 }
