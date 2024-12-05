@@ -3,16 +3,15 @@ package com.example.taskmanagementsystem.controllers;
 import com.example.taskmanagementsystem.dtos.UserAuthenticationRequestDTO;
 import com.example.taskmanagementsystem.utilities.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.web.bind.annotation.*;
+
+import javax.servlet.http.Cookie;
 
 
 @RestController
@@ -39,8 +38,13 @@ public class AuthenticationController {
         final String jwt = jwtUtil.generateToken(userDetails.getUsername());
         System.out.println("Generated token");
         HttpHeaders headers = new HttpHeaders();
-        headers.setBearerAuth(jwt);
-        //return ResponseEntity.ok(new AuthenticationResponse(jwt));
+        Cookie cookie=new Cookie("JWT",jwt); //Use ResponseCookie instead of Cookie
+        cookie.setDomain("localhost");
+        cookie.setPath("/");
+        cookie.setMaxAge(3600);
+        cookie.setHttpOnly(true);
+        String cookieString=String.format("%s=%s; HttpOnly; Domain=%s; Path=%s; Max-Age=%d",cookie.getName(),cookie.getValue(),cookie.getDomain(),cookie.getPath(),cookie.getMaxAge());
+        headers.set(HttpHeaders.SET_COOKIE,cookieString+"; SameSite=Strict");
         return new ResponseEntity<>("Authenticated", headers, HttpStatus.OK);
     }
 
