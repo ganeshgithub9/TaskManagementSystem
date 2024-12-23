@@ -40,10 +40,10 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         String path = request.getRequestURI();
 
         // public endpoints also get into custom filters. So, handling them here
-        if ("/authenticate".equals(path)||"/api/register".equals(path)) {
-            filterChain.doFilter(request, response);
-            return;
-        }
+//        if ("/authenticate".equals(path)||"/api/register".equals(path)) {
+//            filterChain.doFilter(request, response);
+//            return;
+//        }
 
         final Cookie[] cookies = request.getCookies();
         System.out.println("Inside JWT filter");
@@ -57,7 +57,12 @@ public class JwtRequestFilter extends OncePerRequestFilter {
                     break;
                 }
             }
-            username=jwtUtil.extractUsername(jwt);
+            try {
+                username = jwtUtil.extractUsername(jwt);
+            }
+            catch (Exception e){
+                System.out.println(e.getMessage());
+            }
             System.out.println(username);
             if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                 UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);

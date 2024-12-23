@@ -29,6 +29,6 @@ public class CustomRoleService implements RoleService{
 
     @Override
     public Role findByRole(String role) throws RoleNotFoundException {
-        return Optional.ofNullable(roleRepository.findByName(role)).orElseThrow(()->new RoleNotFoundException(role +" not found"));
+        return Optional.ofNullable(roleRepository.findByName(role)).orElseThrow(()->new RoleNotFoundException("Role "+role +" not found"));
     }
 }

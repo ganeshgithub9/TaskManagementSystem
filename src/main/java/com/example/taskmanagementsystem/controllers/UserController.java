@@ -6,6 +6,7 @@ import com.example.taskmanagementsystem.dtos.UserResponseDTO;
 import com.example.taskmanagementsystem.entities.User;
 import com.example.taskmanagementsystem.exceptions.RoleNotFoundException;
 import com.example.taskmanagementsystem.services.UserService;
+import org.modelmapper.MappingException;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -23,7 +24,7 @@ public class UserController {
         this.modelMapper = modelMapper;
     }
     @PostMapping("/register")
-    public ResponseEntity<UserResponseDTO> registerUser(@RequestBody UserRequestDTO userRequestDTO) throws RoleNotFoundException {
+    public ResponseEntity<UserResponseDTO> registerUser(@RequestBody UserRequestDTO userRequestDTO) throws RoleNotFoundException, MappingException {
         User user=userService.registerUser(userRequestDTO);
         UserResponseDTO userResponseDTO=modelMapper.map(user, UserResponseDTO.class);
         return new ResponseEntity<>(userResponseDTO, HttpStatus.CREATED);
@@ -41,6 +42,16 @@ public class UserController {
         User user=userService.getUser(id);
         UserResponseDTO userResponseDTO=modelMapper.map(user, UserResponseDTO.class);
         return new ResponseEntity<>(userResponseDTO, HttpStatus.OK);
+    }
+
+    @GetMapping("/hi")
+    public ResponseEntity<String> hi(){
+        return new ResponseEntity<>("hi", HttpStatus.OK);
+    }
+
+    @ExceptionHandler
+    public ResponseEntity<String> handleMappingException(MappingException exception){
+        return new ResponseEntity<>("Modelmapper mapping errors", HttpStatus.CONFLICT);
     }
 
     @ExceptionHandler
