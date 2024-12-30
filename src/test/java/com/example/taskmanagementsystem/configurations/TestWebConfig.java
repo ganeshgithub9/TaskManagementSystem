@@ -23,6 +23,8 @@ public class TestWebConfig {
                 .authorizeHttpRequests(authorizeRequests->authorizeRequests
                         .requestMatchers("/api/register", "/authenticate").permitAll()
                         .anyRequest().authenticated());
+
+        System.out.println("test profile security filter chain");
         return http.build();
     }
 
